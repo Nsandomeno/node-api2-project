@@ -47,7 +47,7 @@ router.post("/:id/comments", (req, res) => {
 
     Posts.findById(id).then((shape) => {
         if (typeof shape === 'array') {
-            console.log("this is shape:", shape)
+
             res.status(404).json({ message: "We could not find a post with this id." })
         } else if (typeof shape === 'object' && !newComment.text) {
             res.status(400).json({ message: "Please provide text for the commnet." })
@@ -62,5 +62,15 @@ router.post("/:id/comments", (req, res) => {
         res.status(500).json({ message: "The comment could not be saved." })
     })
 })
+
+// (3) - get - returns array of all post objects
+router.get("/", (req,res) => {
+    Posts.find().then((posts) => {
+        res.status(200).json(posts)
+    }).catch((error) => {
+        res.status(500).json({ message:"Posts information could not be retrieved." })
+    })
+})
+
 // export
 module.exports = router
