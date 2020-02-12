@@ -7,6 +7,7 @@ const router = express.Router()
 // middleware
 
 // route handlers
+
 // (1) - post - create a post using the information sent inside the request body
 router.post("/", (req, res) => {
     const newPost = req.body
@@ -26,24 +27,6 @@ router.post("/", (req, res) => {
 router.post("/:id/comments", (req, res) => {
     const { id } = req.params
     const newComment = { ...req.body, post_id: id }
-
-    // if (!newComment.text) {
-    //     res.status(400).json({ message: "Please provide text for the comment." })
-    // } else {
-    //     Posts.findById(id).then((shape) => {
-    //         if (typeof shape === 'array') {
-    //             res.status(404).json({ message: "The post with this id could not be found." })
-    //         } else {
-    //             Posts.insertComment(newComment).then((matchingId) => {
-    //                 res.status(201).json(matchingId)
-    //             }).catch((error) => {
-    //                 res.status(500).json({ message: "The comment could not be saved." })
-    //             })
-    //         }
-    //     }).catch((error) => {
-    //         res.status(404).json({ message: "The post with this id could not be found." })
-    //     })
-    // }
 
     Posts.findById(id).then((shape) => {
         if (typeof shape === 'array') {
@@ -106,5 +89,47 @@ router.get("/:id/comments", (req, res) => {
     })
 })
 
+// (6) - delete - delete a post object
+router.delete("/:id", (req, res) => {
+    const { id } = req.params;
+
+    Posts.findById(id).then((shape) => {
+        if (shape.length === 0) {
+            res.status(404).json({ message: "The post with this id does not exist." })
+        } else {
+            Posts.remove(id).then((num) => {
+                res.status(200).json(shape)
+            }).catch((error) => {
+                res.status(500).json({ message: "The post could not be removed." })
+            })
+        }
+    }).catch((error) => {
+        res.status(500).json({ message: "The post could not be removed." })
+    })
+})
+
+// (7) - put - update the post 
+router.put("/:id", (req, res) => {
+    const updatedPost = req.body
+    const { id } = req.params
+
+    if (!updatedPost.title || !updatedPost.contents) {
+        res.status(400).json({ message: "Please provide title and contents for the post." })
+    } else {
+        Posts.findById(id).then((shape) => {
+            if (shape.length === 0) {
+                res.status(404).json({ message:"The post with the specified ID does not exist." })
+            } else {
+                Posts.update(id, updatedPost).then((num) => {
+                    res.status(200).json(updatedPost)
+                }).catch((error) => {
+                    res.status(500).json({ message: "The post information could not be modified." })
+                })
+            }
+        }).catch((error) => {
+            res.status(500).json({ message: "The post information could not be modified." })
+        })
+    }
+})
 // export
 module.exports = router
