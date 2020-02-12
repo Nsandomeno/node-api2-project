@@ -79,7 +79,11 @@ router.get("/:id/comments", (req, res) => {
             res.status(404).json({ message: "No post with this id could be found." })
         } else {
             Posts.findPostComments(id).then((comments) => {
-                res.status(200).json(comments)
+                if (comments.length === 0) {
+                    res.status(299).json({ message: "Request processed... there are not comments on this post." })
+                } else {
+                    res.status(200).json(comments)
+                }
             }).catch((error) => {
                 res.status(500).json({ message: "The Post info could not be retrieved." })
             })
